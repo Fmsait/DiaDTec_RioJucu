@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dia D da Tecnologia — Do Rio à Energia</title>
+  <style>
+    :root {
+      --bg: #0b1020; /* azul petróleo escuro */
+      --card: #101936;
+      --text: #e6ecff;
+      --muted: #a7b3d1;
+      --accent: #4cc9f0; /* ciano */
+      --accent-2: #80ed99; /* verde */
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 10% 10%, #0f1a3f 0%, #0b1020 50%, #090d1a 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+    header {
+      display: grid; gap: 8px; margin: 16px 0 20px;
+    }
+    .eyebrow { color: var(--accent-2); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; }
+    h1 { margin: 0; font-size: clamp(24px, 4vw, 40px); }
+    .sub { color: var(--muted); font-size: clamp(14px, 2vw, 18px); }
+
+    .card { background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+
+    .player-area { position: relative; }
+    video { width: 100%; height: auto; display: block; background: #000; aspect-ratio: 16 / 9; }
+
+    .overlay {
+      position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+      background: radial-gradient(700px 300px at 50% 10%, rgba(76, 201, 240, .12), transparent 70%);
+    }
+    .unmute {
+      pointer-events: auto; appearance: none; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(16,25,54,.6); color: var(--text); padding: 12px 16px; border-radius: 999px;
+      font-weight: 600; backdrop-filter: blur(6px); cursor: pointer; display: inline-flex; align-items: center; gap: 10px;
+    }
+    .unmute:hover { transform: translateY(-1px); }
+
+    .meta { display: grid; gap: 6px; padding: 16px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; }
+    .badge { font-size: 12px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); color: var(--muted); }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .tile { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px; display: grid; gap: 8px; }
+    .tile b { font-size: 14px; }
+    .tile small { color: var(--muted); }
+    .tile button { appearance: none; border: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #05131a; font-weight: 700; padding: 8px 10px; border-radius: 10px; cursor: pointer; }
+
+    footer { color: var(--muted); font-size: 13px; margin-top: 18px; text-align: center; }
+    .hint { color: var(--muted); font-size: 14px; margin-top: 10px; }
+    a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Dia D da Tecnologia</div>
+      <h1>Do Rio à Energia: Conscientização e Sustentabilidade em Movimento</h1>
+      <p class="sub">Maquete interativa — trecho do <b>Rio Jucu</b> com água corrente real. Assista ao vídeo de apresentação automaticamente ao abrir esta página.</p>
+    </header>
+
+    <section class="card">
+      <div class="player-area">
+        <video id="player" playsinline autoplay muted controls></video>
+        <div class="overlay" id="overlay">
+          <button class="unmute" id="unmuteBtn" aria-label="Ativar som">
+            🔊 Ativar som
+          </button>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="badges">
+          <span class="badge">Projeto: Rio Jucu</span>
+          <span class="badge">Autoplay habilitado</span>
+          <span class="badge">Educação Ambiental</span>
+        </div>
+        <p class="hint">Dica: por política dos navegadores, o vídeo inicia <b>sem som</b>. Toque em <b>“Ativar som”</b> para ouvir o áudio.</p>
+      </div>
+    </section>
+
+    <section class="grid" id="playlist"></section>
+
+    <footer>
+      <p>💡 Você também pode abrir diretamente um vídeo específico usando <code>?v=nome-do-arquivo.mp4</code> na URL.</p>
+    </footer>
+  </div>
+
+  <script>
+    // === CONFIGURE AQUI SEUS VÍDEOS ===
+    // Dê o caminho exato dos arquivos .mp4 hospedados no GitHub (raw.githubusercontent.com)
+    // Exemplo: "https://raw.githubusercontent.com/USUARIO/REPO/BRANCH/videos/rio-jucu-maquete.mp4"
+    const VIDEOS = [
+      {
+        src: "https://raw.githubusercontent.com/USUARIO/REPO/BRANCH/videos/rio-jucu-maquete.mp4",
+        titulo: "Apresentação da Maquete — Rio Jucu",
+        descricao: "Visão geral do projeto e funcionamento da água corrente.",
+      },
+      {
+        src: "https://raw.githubusercontent.com/USUARIO/REPO/BRANCH/videos/contexto-rio-jucu.mp4",
+        titulo: "Contexto do Rio Jucu",
+        descricao: "Localização, importância e desafios ambientais.",
+      }
+    ];
+
+    // Lê parâmetro ?v= para abrir diretamente um arquivo
+    const url = new URL(window.location.href);
+    const paramSrc = url.searchParams.get('v');
+
+    const player = document.getElementById('player');
+    const overlay = document.getElementById('overlay');
+    const unmuteBtn = document.getElementById('unmuteBtn');
+    const playlistEl = document.getElementById('playlist');
+
+    function setSource(src) {
+      player.src = src;
+      // Força reinício e tenta autoplay
+      player.muted = true; // necessário para autoplay em navegadores
+      const playPromise = player.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {/* silencioso: alguns navegadores pedem gesto do usuário */});
+      }
+      window.history.replaceState({}, '', `${location.pathname}?v=${encodeURIComponent(src)}`);
+    }
+
+    // Inicialização: se veio ?v= usa ele; senão, usa o primeiro da lista
+    const initialSrc = paramSrc || (VIDEOS[0] && VIDEOS[0].src);
+    if (initialSrc) setSource(initialSrc);
+
+    // Construir a playlist
+    function buildPlaylist() {
+      if (!VIDEOS.length) return;
+      playlistEl.innerHTML = '';
+      VIDEOS.forEach(v => {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.innerHTML = `
+          <b>${v.titulo}</b>
+          <small>${v.descricao || ''}</small>
+          <button type="button">Assistir</button>
+        `;
+        tile.querySelector('button').addEventListener('click', () => setSource(v.src));
+        playlistEl.appendChild(tile);
+      });
+    }
+    buildPlaylist();
+
+    // Botão para ativar som
+    unmuteBtn.addEventListener('click', () => {
+      player.muted = false;
+      overlay.style.display = 'none';
+      player.play();
+    });
+
+    // Esconde overlay se o usuário interagir com o vídeo
+    player.addEventListener('play', () => {
+      // Mantém overlay visível apenas até o usuário optar por som
+    });
+  </script>
+</body>
+</html>
